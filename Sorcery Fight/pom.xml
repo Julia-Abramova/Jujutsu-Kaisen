@@ -12,26 +12,22 @@
         <maven.compiler.source>24</maven.compiler.source>
         <maven.compiler.target>24</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Единая версия для всех Jackson библиотек -->
         <jackson.version>2.19.0</jackson.version>
     </properties>
     
     <dependencies>
-        <!-- Jackson для JSON (ObjectMapper) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- Jackson для XML (если действительно нужен) -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- Другие зависимости -->
         <dependency>
             <groupId>com.aerospike</groupId>
             <artifactId>java-object-mapper</artifactId>
