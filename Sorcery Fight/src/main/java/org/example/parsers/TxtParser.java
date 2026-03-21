@@ -7,65 +7,74 @@ import java.util.*;
 public class TxtParser implements MissionParser {
 
     @Override
-    public Mission parse(String file) throws IOException {
-        Map<String, String> keyValues = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+    public Mission parse(String filePath) throws IOException {
+        Map<String, String> keyValueMap = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
                 String[] parts = line.split(":", 2);
                 if (parts.length < 2) {
                     throw new IOException("Invalid line format: " + line);
                 }
                 String key = parts[0].trim();
                 String value = parts[1].trim();
-                keyValues.put(key, value);
+                keyValueMap.put(key, value);
             }
         }
 
         Mission mission = new Mission();
-        mission.setMissionId(getRequired(keyValues, "missionId"));
-        mission.setDate(getRequired(keyValues, "date"));
-        mission.setLocation(getRequired(keyValues, "location"));
-        mission.setOutcome(Outcome.valueOf(getRequired(keyValues, "outcome")));
-        mission.setDamageCost(Long.parseLong(getRequired(keyValues, "damageCost")));
+        mission.setMissionId(getRequired(keyValueMap, "missionId"));
+        mission.setDate(getRequired(keyValueMap, "date"));
+        mission.setLocation(getRequired(keyValueMap, "location"));
+        mission.setOutcome(Outcome.valueOf(getRequired(keyValueMap, "outcome")));
+        mission.setDamageCost(Long.parseLong(getRequired(keyValueMap, "damageCost")));
 
         Curse curse = new Curse();
-        curse.setName(getRequired(keyValues, "curse.name"));
-        curse.setThreatLevel(ThreatLevel.valueOf(getRequired(keyValues, "curse.threatLevel")));
+        curse.setName(getRequired(keyValueMap, "curse.name"));
+        curse.setThreatLevel(ThreatLevel.valueOf(getRequired(keyValueMap, "curse.threatLevel")));
         mission.setCurse(curse);
 
         Map<Integer, Sorcerer> sorcererMap = new TreeMap<>();
-        for (Map.Entry<String, String> entry : keyValues.entrySet()) {
+        for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
             String key = entry.getKey();
             if (key.startsWith("sorcerer[")) {
-                int idx = extractIndex(key);
-                Sorcerer s = sorcererMap.computeIfAbsent(idx, k -> new Sorcerer());
+                int index = extractIndex(key);
+                Sorcerer sorcerer = sorcererMap.get(index);
+                if (sorcerer == null) {
+                    sorcerer = new Sorcerer();
+                    sorcererMap.put(index, sorcerer);
+                }
                 if (key.endsWith(".name")) {
-                    s.setName(entry.getValue());
+                    sorcerer.setName(entry.getValue());
                 } else if (key.endsWith(".rank")) {
-                    s.setRank(Rank.valueOf(entry.getValue()));
+                    sorcerer.setRank(Rank.valueOf(entry.getValue()));
                 }
             }
         }
         mission.setSorcerers(new ArrayList<>(sorcererMap.values()));
 
-
         Map<Integer, Technique> techniqueMap = new TreeMap<>();
-        for (Map.Entry<String, String> entry : keyValues.entrySet()) {
+        for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
             String key = entry.getKey();
             if (key.startsWith("technique[")) {
-                int idx = extractIndex(key);
-                Technique t = techniqueMap.computeIfAbsent(idx, k -> new Technique());
+                int index = extractIndex(key);
+                Technique technique = techniqueMap.get(index);
+                if (technique == null) {
+                    technique = new Technique();
+                    techniqueMap.put(index, technique);
+                }
                 if (key.endsWith(".name")) {
-                    t.setName(entry.getValue());
+                    technique.setName(entry.getValue());
                 } else if (key.endsWith(".type")) {
-                    t.setType(TechniqueType.valueOf(entry.getValue()));
+                    technique.setType(TechniqueType.valueOf(entry.getValue()));
                 } else if (key.endsWith(".owner")) {
-                    t.setOwner(entry.getValue());
+                    technique.setOwner(entry.getValue());
                 } else if (key.endsWith(".damage")) {
-                    t.setDamage(Long.parseLong(entry.getValue()));
+                    technique.setDamage(Long.parseLong(entry.getValue()));
                 }
             }
         }

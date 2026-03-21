@@ -1,16 +1,11 @@
 package org.example.parsers;
 
 import org.example.model.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.*;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import javax.xml.stream.events.*;
 
 public class XmlParser implements MissionParser {
 

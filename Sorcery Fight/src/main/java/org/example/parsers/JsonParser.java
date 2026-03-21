@@ -4,54 +4,55 @@ import org.example.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class JsonParser implements MissionParser {
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public Mission parse(String filePath) throws IOException {
-        Mission missionJson = mapper.readValue(new File(filePath), Mission.class);
-        return convert(missionJson);
+        Mission missionFromJson = mapper.readValue(new File(filePath), Mission.class);
+        return convert(missionFromJson);
     }
 
-    private Mission convert(Mission json) {
+    private Mission convert(Mission jsonMission) {
         Mission mission = new Mission();
-
-        mission.setMissionId(json.getMissionId());
-        mission.setDate(json.getDate());
-        mission.setLocation(json.getLocation());
-        mission.setOutcome(json.getOutcome());
-        mission.setDamageCost(json.getDamageCost());
+        mission.setMissionId(jsonMission.getMissionId());
+        mission.setDate(jsonMission.getDate());
+        mission.setLocation(jsonMission.getLocation());
+        mission.setOutcome(jsonMission.getOutcome());
+        mission.setDamageCost(jsonMission.getDamageCost());
 
         Curse curse = new Curse();
-        curse.setName(json.getCurse().getName());
-        curse.setThreatLevel(json.getCurse().getThreatLevel());
+        curse.setName(jsonMission.getCurse().getName());
+        curse.setThreatLevel(jsonMission.getCurse().getThreatLevel());
         mission.setCurse(curse);
 
-        List<Sorcerer> sorcerers = json.getSorcerers().stream()
-                .map(s -> {
-                    Sorcerer sorc = new Sorcerer();
-                    sorc.setName(s.getName());
-                    sorc.setRank(s.getRank());
-                    return sorc;
-                })
-                .collect(Collectors.toList());
-        mission.setSorcerers(sorcerers);
+        List<Sorcerer> jsonSorcerers = jsonMission.getSorcerers();
+        List<Sorcerer> convertedSorcerers = new ArrayList<>();
 
-        List<Technique> techniques = json.getTechniques().stream()
-                .map(t -> {
-                    Technique tech = new Technique();
-                    tech.setName(t.getName());
-                    tech.setType(t.getType());
-                    tech.setOwner(t.getOwner());
-                    tech.setDamage(t.getDamage());
-                    return tech;
-                })
-                .collect(Collectors.toList());
-        mission.setTechniques(techniques);
+        for (Sorcerer jsonSorcerer : jsonSorcerers) {
+            Sorcerer sorcerer = new Sorcerer();
+            sorcerer.setName(jsonSorcerer.getName());
+            sorcerer.setRank(jsonSorcerer.getRank());
+            convertedSorcerers.add(sorcerer);
+        }
+        mission.setSorcerers(convertedSorcerers);
 
+        List<Technique> jsonTechniques = jsonMission.getTechniques();
+        List<Technique> convertedTechniques = new ArrayList<>();
+
+        for (Technique jsonTechnique : jsonTechniques) {
+            Technique technique = new Technique();
+            technique.setName(jsonTechnique.getName());
+            technique.setType(jsonTechnique.getType());
+            technique.setOwner(jsonTechnique.getOwner());
+            technique.setDamage(jsonTechnique.getDamage());
+            convertedTechniques.add(technique);
+        }
+        mission.setTechniques(convertedTechniques);
         return mission;
     }
 }
